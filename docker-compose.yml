@@ -1,0 +1,12 @@
+services:
+ postgres:
+   image: postgres
+   environment:  # Corrigido o typo em "environment"
+     - POSTGRES_PASSWORD=123456
+   ports:
+     - 5432:5432
+   volumes:
+     - pgdata:/var/lib/postgresql/data  # Corrigido o typo em "postresql" e adicionado o caminho correto para os dados do PostgreSQL
+
+volumes:
+  pgdata:
