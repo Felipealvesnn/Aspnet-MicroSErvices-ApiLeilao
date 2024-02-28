@@ -10,7 +10,7 @@ namespace AuctionService.Data
         }
         public DbSet<Entities.Auction> Auctions { get; set; }
 
-
+        
 
     }
 }
