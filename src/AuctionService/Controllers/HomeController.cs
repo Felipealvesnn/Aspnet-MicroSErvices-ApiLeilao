@@ -22,9 +22,9 @@ namespace AuctionService.Controllers
         public async Task<ActionResult<List<AuctionDto>>> Index()
         {
             var auctions = await _auctionDb.Auctions
-                .Include(a => a.Item).OrderBy(x=>x.Item.Model)
+                .Include(a => a.Item).OrderBy(x => x.Item.Model)
                 .ToListAsync();
-         
+
             var auctionsDto = _mapper.Map<List<AuctionDto>>(auctions);
             return Ok(auctionsDto);
         }
@@ -48,7 +48,10 @@ namespace AuctionService.Controllers
         {
             var auction = _mapper.Map<Auction>(createAuctionDto);
             _auctionDb.Auctions.Add(auction);
-            await _auctionDb.SaveChangesAsync();
+            var result = await _auctionDb.SaveChangesAsync() > 0;
+
+            if (!result) return BadRequest();
+
             var auctionDto = _mapper.Map<AuctionDto>(auction);
             return CreatedAtAction(nameof(GetAuction), new { id = auction.Id }, auctionDto);
         }
