@@ -26,6 +26,7 @@ namespace AuctionService.DTOs
         public int ReservePrice { get; set; }
 
         [Required]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm:ss}")]
         public DateTime AuctionEnd { get; set; }
     }
 }

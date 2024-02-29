@@ -1,15 +1,22 @@
 services:
- postgres:
-   image: postgres
-   environment:  # Corrigido o typo em "environment"
-     - POSTGRES_PASSWORD=123456
-      PGDATA: /data/postgres
-   ports:
-     - 5432:5432
-   volumes:
-     - postgres:/data/postgres
-     
-   restart: unless-stopped
-
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=123456
+    ports:
+      - 5432:5432
+    volumes:
+      - /var/lib/postresql/data
+    restart: unless-stopped
+  mongodb:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=123456
+    ports:
+      - 27017:27017
+    volumes:
+      - /var/lib/mongodb/data
 volumes:
   pgdata:
+  mongodata:

@@ -11,6 +11,9 @@ builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+          
+
         });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -26,6 +29,7 @@ builder.Services.AddDbContext<AuctionDbContext>(
     }
 );
 var app = builder.Build();
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
