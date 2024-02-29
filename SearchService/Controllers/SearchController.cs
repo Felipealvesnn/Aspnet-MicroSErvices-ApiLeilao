@@ -1,7 +1,8 @@
-﻿using AuctionService.Entities;
+﻿
 using Microsoft.AspNetCore.Mvc;
+using SearchService.models;
 
-namespace AuctionService.Controllers
+namespace SearchService.Controllers
 {
     [ApiController]
     [Route("api/search")]
@@ -9,7 +10,7 @@ namespace AuctionService.Controllers
     {
         public async Task<ActionResult<Item>> SeachItems(string searchterm)
         {
-            return Ok();
+            return Ok(); 
         }
     }
 }
