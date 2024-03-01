@@ -2,6 +2,7 @@
 using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
@@ -20,14 +21,25 @@ namespace AuctionService.Controllers
             _mapper = mapper;
         }
 
-        public async Task<ActionResult<List<AuctionDto>>> Index()
+        public async Task<ActionResult<List<AuctionDto>>> Index(string? date)
         {
-            var auctions = await _auctionDb.Auctions
-                .Include(a => a.Item).OrderBy(x => x.Item.Model)
-                .ToListAsync();
+            var query = _auctionDb.Auctions
+                .Include(a => a.Item).OrderBy(x => x.Item.Make).AsQueryable();
 
-            var auctionsDto = _mapper.Map<List<AuctionDto>>(auctions);
-            return Ok(auctionsDto);
+            if (!string.IsNullOrEmpty(date))
+            {
+
+                query = query.Where(x => x.UpdateAt.CompareTo(DateTime.Parse(date)
+                    .ToUniversalTime() ) > 0);
+
+            }
+            var model = await query.ProjectTo<AuctionDto>(
+                _mapper.ConfigurationProvider).ToListAsync();
+          
+
+
+
+            return Ok(model);
         }
 
         [HttpGet("{id}")]
@@ -49,7 +61,7 @@ namespace AuctionService.Controllers
 
         public async Task<ActionResult<AuctionDto>> CreateAuction(CreateAuctionDto createAuctionDto)
         {
-          //  createAuctionDto.AuctionEnd = createAuctionDto.AuctionEnd.o();
+            //  createAuctionDto.AuctionEnd = createAuctionDto.AuctionEnd.o();
             var auction = _mapper.Map<Auction>(createAuctionDto);
             _auctionDb.Auctions.Add(auction);
             var result = await _auctionDb.SaveChangesAsync() > 0;

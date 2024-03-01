@@ -9,7 +9,7 @@ namespace SearchService.models
         public string Winner { get; set; }
         public int SoldAmount { get; set; }
         public int CurrentHighBid { get; set; }
-        public DateTime CreateAT { get; set; }
+        public DateTime CreateAT { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; }
         public DateTime AuctionEnd { get; set; }
         public string Status { get; set; }
