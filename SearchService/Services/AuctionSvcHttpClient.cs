@@ -21,6 +21,7 @@ namespace SearchService.Services
                 .Sort(x=>x.Descending(x=>x.UpdatedAt))
                 .Project(x=> x.UpdatedAt.ToString())
                 .ExecuteFirstAsync();
+
             var url = _config["AuctionServiceUrl"];
             var stringnec = _config["urlladecara"];
 

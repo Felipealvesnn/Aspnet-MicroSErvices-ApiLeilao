@@ -3,6 +3,8 @@ using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Contracts;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
@@ -14,11 +16,13 @@ namespace AuctionService.Controllers
     {
         private readonly AuctionDbContext _auctionDb;
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public HomeController(AuctionDbContext auctionDb, IMapper mapper)
+        public HomeController(AuctionDbContext auctionDb, IMapper mapper, IPublishEndpoint publishEndpoint)
         {
             _auctionDb = auctionDb;
             _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task<ActionResult<List<AuctionDto>>> Index(string? date)
@@ -30,12 +34,12 @@ namespace AuctionService.Controllers
             {
 
                 query = query.Where(x => x.UpdateAt.CompareTo(DateTime.Parse(date)
-                    .ToUniversalTime() ) > 0);
+                    .ToUniversalTime()) > 0);
 
             }
             var model = await query.ProjectTo<AuctionDto>(
                 _mapper.ConfigurationProvider).ToListAsync();
-          
+
 
 
 
@@ -69,6 +73,11 @@ namespace AuctionService.Controllers
             if (!result) return BadRequest();
 
             var auctionDto = _mapper.Map<AuctionDto>(auction);
+
+            await _publishEndpoint.Publish(_mapper.Map<AuctionCreated>(auctionDto));
+
+
+
             return CreatedAtAction(nameof(GetAuction), new { id = auction.Id }, auctionDto);
         }
         [HttpPut("{id}")]

@@ -1,8 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
-using MongoDB.Entities;
+using MassTransit;
+
 using Polly;
 using Polly.Extensions.Http;
+using SearchService.Consumers;
 using SearchService.Data;
 using SearchService.models;
 using SearchService.Services;
@@ -18,6 +18,19 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
 });
 builder.Services.AddHttpClient<AuctionSvcHttpClient>().AddPolicyHandler(GetPolicy());
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumersFromNamespaceContaining<AuctionCreatedConsumer>();
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("Procurar", false)); 
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 //builder.Services.AddEndpointsApiExplorer();
@@ -42,7 +55,7 @@ app.Lifetime.ApplicationStarted.Register(async () =>
 {
     await Policy.Handle<TimeoutException>()
         .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(10))
-        .ExecuteAndCaptureAsync(async () => 
+        .ExecuteAndCaptureAsync(async () =>
         await DbInitializer.InitDb(app));
 
 });
@@ -57,6 +70,7 @@ app.MapControllers();
 
 app.Run();
 
+//Isso aqui é pra ele tentar a requisiçao pelo menos 6 vezes antes de desistir
 static IAsyncPolicy<HttpResponseMessage> GetPolicy()
 {
 

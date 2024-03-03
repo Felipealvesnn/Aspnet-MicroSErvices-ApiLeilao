@@ -1,5 +1,7 @@
+using AuctionService.Consumers;
 using AuctionService.Data;
 using AuctionService.RequestHelpers;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -12,7 +14,7 @@ builder.Services.AddControllers()
         {
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
-          
+
 
         });
 
@@ -28,6 +30,27 @@ builder.Services.AddDbContext<AuctionDbContext>(
 
     }
 );
+builder.Services.AddMassTransit(x =>
+{
+
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("Leilao", false));
+    x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
+
+    x.AddEntityFrameworkOutbox<AuctionDbContext>(o => { 
+    
+        o.QueryTimeout = TimeSpan.FromSeconds(30);
+        o.UsePostgres();
+        o.UseBusOutbox();
+    
+    });
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
+
+
 var app = builder.Build();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
