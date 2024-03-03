@@ -68,13 +68,17 @@ namespace AuctionService.Controllers
             //  createAuctionDto.AuctionEnd = createAuctionDto.AuctionEnd.o();
             var auction = _mapper.Map<Auction>(createAuctionDto);
             _auctionDb.Auctions.Add(auction);
-            var result = await _auctionDb.SaveChangesAsync() > 0;
-
-            if (!result) return BadRequest();
 
             var auctionDto = _mapper.Map<AuctionDto>(auction);
 
             await _publishEndpoint.Publish(_mapper.Map<AuctionCreated>(auctionDto));
+
+
+            var result = await _auctionDb.SaveChangesAsync() > 0;
+
+            if (!result) return BadRequest();
+
+
 
 
 
