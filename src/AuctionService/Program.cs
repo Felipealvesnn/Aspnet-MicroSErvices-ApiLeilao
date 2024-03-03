@@ -33,9 +33,10 @@ builder.Services.AddDbContext<AuctionDbContext>(
 builder.Services.AddMassTransit(x =>
 {
 
-    //x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("Leilao", false));
-    //x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
-      //servico de outbox do banco, ficar msg q tem algo la  
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("Leilao", false));
+    x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
+
+    //servico de outbox do banco, ficar msg q tem algo la  
     x.AddEntityFrameworkOutbox<AuctionDbContext>(o => { 
     
         o.QueryTimeout = TimeSpan.FromSeconds(30);
