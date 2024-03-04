@@ -28,6 +28,11 @@ builder.Services.AddMassTransit(x =>
     x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("Procurar", false)); 
     x.UsingRabbitMq((context, cfg) =>
     {
+        cfg.ReceiveEndpoint("procurar", e =>
+        {
+            e.UseMessageRetry(r => r.Interval(5, 5));
+            e.ConfigureConsumer<AuctionCreatedConsumer>(context);
+        });
         cfg.ConfigureEndpoints(context);
     });
 });

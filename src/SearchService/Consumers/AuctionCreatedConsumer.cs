@@ -20,6 +20,11 @@ namespace SearchService.Consumers
             Console.WriteLine($"conbsumer foi criaro {context.Message}");
 
             var item = _mapper.Map<Item>(context.Message);
+
+            if (item.Model == "Foo")
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
             await item.SaveAsync();
 
         }
