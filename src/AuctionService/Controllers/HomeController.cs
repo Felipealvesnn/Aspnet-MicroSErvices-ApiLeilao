@@ -5,6 +5,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Contracts;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
@@ -12,6 +13,7 @@ using NpgsqlTypes;
 namespace AuctionService.Controllers
 {
     [ApiController, Route("api/auctions")]
+    [Authorize]
     public class HomeController : ControllerBase
     {
         private readonly AuctionDbContext _auctionDb;
@@ -67,6 +69,7 @@ namespace AuctionService.Controllers
         {
             //  createAuctionDto.AuctionEnd = createAuctionDto.AuctionEnd.o();
             var auction = _mapper.Map<Auction>(createAuctionDto);
+            auction.Seller = User.Identity.Name;
             _auctionDb.Auctions.Add(auction);
 
             var auctionDto = _mapper.Map<AuctionDto>(auction);
@@ -91,7 +94,7 @@ namespace AuctionService.Controllers
 
             if (auction == null) return NotFound();
 
-            //if (auction.Seller != User.Identity.Name) return Forbid();
+            if (auction.Seller != User.Identity.Name) return Forbid();
 
             auction.Item.Make = updateAuctionDto.Make ?? auction.Item.Make;
             auction.Item.Model = updateAuctionDto.Model ?? auction.Item.Model;
@@ -114,11 +117,14 @@ namespace AuctionService.Controllers
 
             if (auction == null) return NotFound();
 
+            if(auction.Seller != User.Identity.Name) return Forbid();
+
             _auctionDb.Remove(auction);
 
             var result = await _auctionDb.SaveChangesAsync() > 0;
-            await _publishEndpoint.Publish(_mapper.Map<AuctionDeleted>(new { 
-            Id= auction.Id.ToString()
+            await _publishEndpoint.Publish(_mapper.Map<AuctionDeleted>(new
+            {
+                Id = auction.Id.ToString()
             }));
 
             if (result) return Ok();
