@@ -5,10 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-<<<<<<< HEAD
 		<DockerfileContext>..\..</DockerfileContext>
-=======
->>>>>>> dc507927a9b31ee79b81d00e7d9d1faacc71d3fd
 	</PropertyGroup>
 
 	<ItemGroup>

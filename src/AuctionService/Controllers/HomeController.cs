@@ -13,7 +13,7 @@ using NpgsqlTypes;
 namespace AuctionService.Controllers
 {
     [ApiController, Route("api/auctions")]
-    [Authorize]
+    //[Authorize]
     public class HomeController : ControllerBase
     {
         private readonly AuctionDbContext _auctionDb;
