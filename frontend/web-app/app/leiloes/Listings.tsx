@@ -1,7 +1,8 @@
 import React from 'react'
+import LeiloesCard from './LeiloesCard';
 
 async function fetchListings() {
-  const res = await fetch('http://localhost:6001/search')
+  const res = await fetch('http://localhost:7002/api/search')
   if (!res.ok) {
     throw new Error('Failed to fetch listings')
   }
@@ -10,10 +11,13 @@ async function fetchListings() {
 
 
 export default async function Listings() {
-    const listings = await fetchListings()
+  const listings = await fetchListings()
   return (
     <div>
-     {JSON.stringify(listings, null, 2)}
+      {listings && listings.result.map((leilao: any) => (
+        <LeiloesCard leilao={leilao} />
+      )
+      )}
 
     </div>
   )
