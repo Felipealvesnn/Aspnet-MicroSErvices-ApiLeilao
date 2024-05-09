@@ -1,3 +1,4 @@
+using AuctionService;
 using AuctionService.Consumers;
 using AuctionService.Data;
 using AuctionService.RequestHelpers;
@@ -30,6 +31,7 @@ builder.Services.AddDbContext<AuctionDbContext>(
 
     }
 );
+
 builder.Services.AddMassTransit(x =>
 {
 
@@ -47,9 +49,25 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, cfg) =>
     {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
+        {
+
+            host.Username(builder.Configuration.GetValue("RabbitMq:Username",
+               "guest"));
+            host.Password(builder.Configuration.GetValue("RabbitMq:Password",
+              "guest"));
+
+        });
+        cfg.ReceiveEndpoint("Leilao", e =>
+        {
+            e.UseMessageRetry(r => r.Interval(5, 5));
+            e.ConfigureConsumer<AuctionCreatedFaultConsumer>(context);
+        });
         cfg.ConfigureEndpoints(context);
     });
 });
+
+builder.Services.ConfigureServicesJwt(builder.Configuration);
 
 
 var app = builder.Build();
@@ -65,6 +83,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 //app.UseHttpsRedirection();
 
 
+app.UseAuthentication();
 
 app.UseAuthorization();
 
